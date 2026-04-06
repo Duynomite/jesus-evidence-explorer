@@ -2030,6 +2030,8 @@ const JOURNEY_STEPS = [
 
 function JourneyModeView() {
   const [currentStep, setCurrentStep] = useState(null); // null=landing, 0-7=steps, 'complete'=done
+  const [selectedEntryId, setSelectedEntryId] = useState(null);
+  const selectedEntry = selectedEntryId ? DATABASE.entries.find(e => e.id === selectedEntryId) : null;
 
   const step = typeof currentStep === 'number' ? JOURNEY_STEPS[currentStep] : null;
 
@@ -2153,10 +2155,7 @@ function JourneyModeView() {
         <h3 className="font-serif font-bold text-ink mb-3">Key Evidence ({curated.length} entries)</h3>
         <div className="space-y-2 mb-4">
           {curated.map(entry => (
-            <button key={entry.id} onClick={() => {
-                window.location.hash = entry.id;
-                window.dispatchEvent(new CustomEvent('navigateToEntry', { detail: entry.id }));
-              }}
+            <button key={entry.id} onClick={() => setSelectedEntryId(entry.id)}
               className="w-full text-left bg-white rounded-lg border border-parchment-darker px-4 py-3 hover:border-gold/30 hover:bg-gold/5 transition-colors group">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-sm text-ink group-hover:text-gold transition-colors">{entry.title}</span>
@@ -2175,10 +2174,7 @@ function JourneyModeView() {
             </summary>
             <div className="space-y-1.5 pl-2 border-l-2 border-parchment-darker">
               {auto.map(entry => (
-                <button key={entry.id} onClick={() => {
-                    window.location.hash = entry.id;
-                    window.dispatchEvent(new CustomEvent('navigateToEntry', { detail: entry.id }));
-                  }}
+                <button key={entry.id} onClick={() => setSelectedEntryId(entry.id)}
                   className="w-full text-left px-3 py-2 rounded-lg hover:bg-parchment-dark transition-colors group">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-ink-light group-hover:text-gold transition-colors">{entry.title}</span>
@@ -2224,6 +2220,16 @@ function JourneyModeView() {
             </svg>
           </button>
         </div>
+
+        {/* Inline Detail Panel */}
+        {selectedEntry && (
+          <DetailPanel
+            entry={selectedEntry}
+            sources={DATABASE.sources}
+            onClose={() => setSelectedEntryId(null)}
+            onNavigate={(id) => setSelectedEntryId(id)}
+          />
+        )}
       </div>
     );
   }
@@ -2381,6 +2387,8 @@ function StrengthMeter({ strength, colorLight }) {
 
 function CaseForChristView() {
   const [expandedPillar, setExpandedPillar] = useState(null);
+  const [selectedEntryId, setSelectedEntryId] = useState(null);
+  const selectedEntry = selectedEntryId ? DATABASE.entries.find(e => e.id === selectedEntryId) : null;
 
   const pillar = expandedPillar ? PILLARS.find(p => p.id === expandedPillar) : null;
   const pillarEntries = pillar ? pillar.entryIds.map(id => DATABASE.entries.find(e => e.id === id)).filter(Boolean) : [];
@@ -2423,10 +2431,7 @@ function CaseForChristView() {
         <h3 className="font-serif font-bold text-ink mb-3">Key Evidence ({pillarEntries.length} entries)</h3>
         <div className="space-y-2 mb-6">
           {pillarEntries.map(entry => (
-            <button key={entry.id} onClick={() => {
-                window.location.hash = entry.id;
-                window.dispatchEvent(new CustomEvent('navigateToEntry', { detail: entry.id }));
-              }}
+            <button key={entry.id} onClick={() => setSelectedEntryId(entry.id)}
               className="w-full text-left bg-white rounded-lg border border-parchment-darker px-4 py-3 hover:border-gold/30 hover:bg-gold/5 transition-colors group">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-sm text-ink group-hover:text-gold transition-colors">{entry.title}</span>
@@ -2463,19 +2468,25 @@ function CaseForChristView() {
             <h3 className="font-serif font-bold text-ink-light text-sm mb-2">Explore Further</h3>
             <div className="flex flex-wrap gap-2">
               {furtherEntries.map(entry => (
-                <button key={entry.id} onClick={() => {
-                    window.location.hash = entry.id;
-                    window.dispatchEvent(new CustomEvent('navigateToEntry', { detail: entry.id }));
-                  }}
+                <button key={entry.id} onClick={() => setSelectedEntryId(entry.id)}
                   className="inline-flex items-center px-3 py-1.5 rounded-lg bg-parchment-dark text-xs text-ink-light hover:bg-parchment-darker hover:text-gold transition-colors">
                   {entry.title.length > 50 ? entry.title.substring(0, 50) + '...' : entry.title}
                   <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                   </svg>
                 </button>
               ))}
             </div>
           </div>
+        )}
+        {/* Inline Detail Panel */}
+        {selectedEntry && (
+          <DetailPanel
+            entry={selectedEntry}
+            sources={DATABASE.sources}
+            onClose={() => setSelectedEntryId(null)}
+            onNavigate={(id) => setSelectedEntryId(id)}
+          />
         )}
       </div>
     );
