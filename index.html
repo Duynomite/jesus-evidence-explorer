@@ -1924,6 +1924,355 @@ function DataEditorView() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// JOURNEY MODE VIEW
+// ═══════════════════════════════════════════════════════════════
+
+const CONFIDENCE_ORDER = ['high', 'medium-high', 'medium', 'medium-low', 'low-medium', 'low', 'debated'];
+
+const JOURNEY_STEPS = [
+  {
+    id: 'existence',
+    title: 'Did Jesus Exist?',
+    subtitle: 'Step 1 of 8',
+    icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+    color: 'from-blue-600 to-blue-700',
+    narrative: 'Before examining any claims about who Jesus was, we need to establish that he existed at all. This might seem obvious, but the "Christ myth" theory — the claim that Jesus never existed — has gained popular attention online. What does the historical evidence actually show? The answer is overwhelming: Jesus of Nazareth is one of the best-attested figures of the ancient world, confirmed by multiple independent non-Christian sources within decades of his life.',
+    entryIds: ['hist-201', 'hist-202', 'hist-205', 'hist-204', 'hist-203', 'hist-206', 'debate-201', 'hist-209'],
+    autoIncludeTags: ['extra-biblical', 'historicity'],
+    autoMinConfidence: 'medium',
+    soWhat: 'Now that we\'ve established Jesus was a real person — crucified under Pontius Pilate, with followers who claimed he rose from the dead — the question becomes: was there a pattern in the ancient Jewish scriptures that predicted someone like him?'
+  },
+  {
+    id: 'prophecies',
+    title: 'What Did Ancient Prophecies Predict?',
+    subtitle: 'Step 2 of 8',
+    icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+    color: 'from-amber-600 to-amber-700',
+    narrative: 'The Hebrew Bible, written between roughly 1000-400 BC, contains dozens of passages about a coming "Anointed One" (Messiah). The Dead Sea Scrolls — discovered in 1947 and dated before Jesus\' birth — confirm these passages were understood as messianic prophecies BEFORE Christianity existed. This matters: these aren\'t retroactive Christian reinterpretations. They\'re predictions that were already in circulation, waiting for a match.',
+    entryIds: ['proph-001', 'proph-009', 'proph-007', 'proph-015', 'proph-021', 'claim-815'],
+    autoIncludeTags: ['prophecy', 'messianic'],
+    autoMinConfidence: 'medium',
+    soWhat: 'We now have a set of ancient predictions: born in Bethlehem, preceded by a forerunner, a suffering servant who dies for others, a king who enters on a donkey, crucifixion details written centuries before crucifixion was invented. Did anyone actually match this pattern?'
+  },
+  {
+    id: 'fulfillment',
+    title: 'Did Jesus Fulfill Them?',
+    subtitle: 'Step 3 of 8',
+    icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+    color: 'from-green-600 to-green-700',
+    narrative: 'Here\'s where the pattern meets a person. For each prophecy we just examined, there\'s a specific claimed fulfillment in Jesus\' life — many attested by multiple independent sources. The most striking case may be the Last Supper: Jesus explicitly quotes Jeremiah 31\'s "new covenant" prophecy, self-consciously claiming to inaugurate what was predicted 600 years earlier. This tradition is traced to within years of the event.',
+    entryIds: ['proph-201', 'proph-301', 'proph-202', 'proph-203', 'proph-302', 'claim-816', 'proph-304', 'proph-305'],
+    autoIncludeTags: ['fulfillment'],
+    autoMinConfidence: 'low',
+    soWhat: 'The prophecy-fulfillment pattern is striking, but a skeptic might ask: could Jesus have simply engineered the fulfillments? Some — like riding a donkey — are possible. But birthplace, lineage, manner of death, and the response of others are not things you can arrange. And there\'s another category of evidence entirely: his miracles.'
+  },
+  {
+    id: 'miracles',
+    title: 'Did Jesus Really Perform Miracles?',
+    subtitle: 'Step 4 of 8',
+    icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+    color: 'from-teal-600 to-teal-700',
+    narrative: 'This is where most people expect the evidence to fall apart. Surely no serious historian believes in miracles? Actually, virtually ALL historical Jesus scholars — including skeptics like Bart Ehrman — accept that Jesus had a genuine reputation as a healer and exorcist. More remarkably, his enemies never denied the miracles. Instead, they said he was a sorcerer. Nine independent hostile sources across 300 years all acknowledged the deeds — none could simply deny them.',
+    entryIds: ['claim-303', 'claim-308', 'claim-806', 'claim-807', 'claim-304', 'claim-820'],
+    autoIncludeTags: ['enemy attestation', 'miracles'],
+    autoMinConfidence: 'medium',
+    soWhat: 'The miracle-working reputation is historically secure — the debate is about the source of the power, not whether anything happened. But the biggest miracle claim of all is the resurrection. What does the evidence actually look like?'
+  },
+  {
+    id: 'resurrection',
+    title: 'Did Jesus Rise from the Dead?',
+    subtitle: 'Step 5 of 8',
+    icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z',
+    color: 'from-purple-600 to-purple-700',
+    narrative: 'This is Christianity\'s central, testable claim. The evidence is more substantial than most people realize. The earliest Christian document — a creed embedded in Paul\'s letter, dated to within 2-5 years of the crucifixion — already lists specific resurrection appearances. A hostile persecutor (Paul) and a skeptic brother (James) both converted based on claimed encounters with the risen Jesus. The tomb was empty. The first witnesses were women — embarrassing in a patriarchal culture and therefore unlikely to be invented.',
+    entryIds: ['event-301', 'event-302', 'event-303', 'claim-803', 'claim-804', 'claim-802', 'claim-818'],
+    autoIncludeTags: ['resurrection', 'empty tomb'],
+    autoMinConfidence: 'medium',
+    soWhat: 'The evidence for the resurrection is stronger than most people expect. But a fair-minded person should ask: are there naturalistic explanations that account for this evidence? Let\'s examine every major alternative theory.'
+  },
+  {
+    id: 'alternatives',
+    title: 'What Are the Alternatives?',
+    subtitle: 'Step 6 of 8',
+    icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    color: 'from-red-600 to-red-700',
+    narrative: 'Intellectual honesty demands we consider every alternative. Scholars have proposed: hallucination (the disciples imagined it), conspiracy (they made it up), swoon (Jesus survived the cross), legend (the story grew over decades), wrong tomb, and more. Each theory has been rigorously examined — and each fails to account for ALL the evidence simultaneously. The hallucination theory can\'t explain Paul\'s hostile conversion. The conspiracy theory can\'t explain why they died for it. The legend theory crashes against the 2-5 year creed timeline.',
+    entryIds: ['debate-302', 'claim-025', 'debate-301', 'debate-303', 'claim-801'],
+    autoIncludeTags: ['alternative theories'],
+    autoMinConfidence: 'low',
+    soWhat: 'No single alternative explains all the facts. But maybe the problem isn\'t the evidence — maybe it\'s the documents themselves. Can we actually trust the New Testament as a historical source?'
+  },
+  {
+    id: 'documents',
+    title: 'Can We Trust the Documents?',
+    subtitle: 'Step 7 of 8',
+    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    color: 'from-orange-600 to-orange-700',
+    narrative: 'The New Testament has over 5,800 Greek manuscripts — more than any other ancient work by orders of magnitude. Homer\'s Iliad has 1,800; most ancient texts have fewer than 20. The earliest fragments date to within decades of composition. But quantity isn\'t everything. More compelling: Luke records 84 historically-verified details in Acts. The Gospels contain "undesigned coincidences" — interlocking details across independent accounts that fingerprint genuine eyewitness testimony. And the systematic pattern of embarrassing material (later Gospels soften what earlier ones preserve) is objective evidence of authentic historical memory.',
+    entryIds: ['claim-215', 'claim-817', 'claim-810', 'claim-809', 'claim-822', 'claim-510'],
+    autoIncludeTags: ['textual criticism', 'manuscript', 'reliability'],
+    autoMinConfidence: 'medium',
+    soWhat: 'The documents are remarkably reliable as historical sources. So we have a real person, matching ancient prophecies, whose miracles even enemies acknowledged, whose resurrection has strong evidence and no adequate alternative explanation, recorded in trustworthy documents. One question remains: what does all this mean?'
+  },
+  {
+    id: 'significance',
+    title: 'Why Does It All Matter?',
+    subtitle: 'Step 8 of 8',
+    icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
+    color: 'from-rose-600 to-rose-700',
+    narrative: 'Christianity is the only messianic movement in history that survived the death of its messiah — and it didn\'t just survive, it proclaimed a crucified leader as divine. Seven comparable movements documented by Josephus all died with their leaders. Within 20 years, strict Jewish monotheists were worshipping Jesus as God — inserting him into the Shema, praying to him in Aramaic, composing hymns about his divine nature. This "big bang" of devotion, among people who would die rather than worship any being other than YHWH, requires a sufficient historical cause. No single piece of evidence proves the case. But the convergence of independent lines — prophecy, history, miracles, resurrection, documents, and the explosive birth of a world-changing movement — creates a cumulative argument far stronger than any individual pillar.',
+    entryIds: ['claim-819', 'claim-812', 'claim-824', 'claim-506', 'claim-823', 'claim-805'],
+    autoIncludeTags: ['early church', 'christology'],
+    autoMinConfidence: 'medium',
+    soWhat: null
+  }
+];
+
+function JourneyModeView() {
+  const [currentStep, setCurrentStep] = useState(null); // null=landing, 0-7=steps, 'complete'=done
+
+  const step = typeof currentStep === 'number' ? JOURNEY_STEPS[currentStep] : null;
+
+  // Get entries for current step: curated + auto-included
+  const stepEntries = useMemo(() => {
+    if (!step) return [];
+    const curated = step.entryIds.map(id => DATABASE.entries.find(e => e.id === id)).filter(Boolean);
+    const curatedIds = new Set(step.entryIds);
+
+    // Auto-include: entries matching tags + min confidence not already curated
+    const confIdx = (c) => CONFIDENCE_ORDER.indexOf(c);
+    const minIdx = confIdx(step.autoMinConfidence || 'medium');
+    const auto = DATABASE.entries.filter(e => {
+      if (curatedIds.has(e.id)) return false;
+      const eTags = (e.tags || []).map(t => t.toLowerCase());
+      const matchesTag = (step.autoIncludeTags || []).some(t => eTags.includes(t.toLowerCase()));
+      const ci = confIdx(e.confidence);
+      const meetsConf = ci >= 0 && ci <= minIdx;
+      return matchesTag && meetsConf;
+    });
+    return { curated, auto };
+  }, [step]);
+
+  const goNext = () => {
+    if (typeof currentStep === 'number' && currentStep < JOURNEY_STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo(0, 0);
+    } else if (currentStep === JOURNEY_STEPS.length - 1) {
+      setCurrentStep('complete');
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const goPrev = () => {
+    if (typeof currentStep === 'number' && currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  // ═══ Completion Screen ═══
+  if (currentStep === 'complete') {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-12">
+        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold to-amber-600 flex items-center justify-center mx-auto mb-6">
+          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h2 className="font-serif text-3xl font-bold text-ink mb-4">Journey Complete</h2>
+        <p className="text-ink-light leading-relaxed mb-6">
+          You've walked through the historical case for Jesus as the Messiah — from his existence, through ancient prophecies and their fulfillment, his miracles and resurrection, the reliability of the documents, and the explosive rise of Christianity. No single piece of evidence proves the case. But the convergence of multiple independent lines creates an argument worth taking seriously.
+        </p>
+        <p className="text-ink-lighter text-sm mb-8">
+          Every entry you saw includes both supporting evidence and counterarguments. Every confidence rating reflects genuine scholarly assessment. The goal was never to tell you what to believe — but to give you the evidence to weigh for yourself.
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          <button onClick={() => setCurrentStep(null)}
+            className="px-5 py-2.5 rounded-lg text-sm font-medium border border-parchment-darker text-ink-light hover:bg-parchment-dark transition-colors">
+            Restart Journey
+          </button>
+          <button onClick={() => {
+              window.dispatchEvent(new CustomEvent('switchTab', { detail: 'case' }));
+            }}
+            className="px-5 py-2.5 rounded-lg text-sm font-medium bg-gold text-white hover:bg-gold-light transition-colors">
+            Explore The Case Tab →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══ Step View ═══
+  if (step) {
+    const { curated, auto } = stepEntries;
+    return (
+      <div>
+        {/* Progress bar */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <button onClick={() => setCurrentStep(null)} className="text-xs text-ink-lighter hover:text-gold transition-colors">
+              ← Exit Journey
+            </button>
+            <span className="text-xs text-ink-lighter">{step.subtitle}</span>
+          </div>
+          <div className="flex gap-1">
+            {JOURNEY_STEPS.map((s, i) => (
+              <button key={s.id} onClick={() => { setCurrentStep(i); window.scrollTo(0, 0); }}
+                className={`flex-1 h-2 rounded-full transition-colors ${
+                  i < currentStep ? 'bg-gold' : i === currentStep ? 'bg-gold' : 'bg-parchment-darker'
+                }`}
+                title={s.title}/>
+            ))}
+          </div>
+          <div className="flex justify-between mt-1">
+            {JOURNEY_STEPS.map((s, i) => (
+              <span key={s.id} className={`text-[9px] leading-tight text-center ${i === currentStep ? 'text-gold font-medium' : 'text-ink-lighter'}`}
+                style={{ width: `${100 / JOURNEY_STEPS.length}%` }}>
+                {i === currentStep ? s.title.replace('?', '') : ''}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Step header */}
+        <div className={`rounded-xl bg-gradient-to-r ${step.color} p-6 mb-6 text-white`}>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d={step.icon}/>
+              </svg>
+            </div>
+            <div>
+              <h2 className="font-serif text-2xl font-bold">{step.title}</h2>
+              <p className="text-white/80 text-sm mt-2 leading-relaxed">{step.narrative}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Curated entries */}
+        <h3 className="font-serif font-bold text-ink mb-3">Key Evidence ({curated.length} entries)</h3>
+        <div className="space-y-2 mb-4">
+          {curated.map(entry => (
+            <button key={entry.id} onClick={() => {
+                window.location.hash = entry.id;
+                window.dispatchEvent(new CustomEvent('navigateToEntry', { detail: entry.id }));
+              }}
+              className="w-full text-left bg-white rounded-lg border border-parchment-darker px-4 py-3 hover:border-gold/30 hover:bg-gold/5 transition-colors group">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-sm text-ink group-hover:text-gold transition-colors">{entry.title}</span>
+                <ConfidenceBadge confidence={entry.confidence}/>
+              </div>
+              <p className="text-xs text-ink-lighter mt-1 line-clamp-2">{entry.summary}</p>
+            </button>
+          ))}
+        </div>
+
+        {/* Auto-included entries */}
+        {auto.length > 0 && (
+          <details className="mb-6">
+            <summary className="text-sm text-ink-light cursor-pointer hover:text-gold transition-colors mb-2">
+              More Related Evidence ({auto.length} additional entries)
+            </summary>
+            <div className="space-y-1.5 pl-2 border-l-2 border-parchment-darker">
+              {auto.map(entry => (
+                <button key={entry.id} onClick={() => {
+                    window.location.hash = entry.id;
+                    window.dispatchEvent(new CustomEvent('navigateToEntry', { detail: entry.id }));
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-parchment-dark transition-colors group">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-ink-light group-hover:text-gold transition-colors">{entry.title}</span>
+                    <ConfidenceBadge confidence={entry.confidence}/>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </details>
+        )}
+
+        {/* So What? callout */}
+        {step.soWhat && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+              </svg>
+              <div>
+                <h4 className="font-serif font-bold text-amber-800 text-sm mb-1">So What?</h4>
+                <p className="text-sm text-amber-700 leading-relaxed">{step.soWhat}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between pt-4 border-t border-parchment-darker">
+          {currentStep > 0 ? (
+            <button onClick={goPrev}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-ink-light hover:bg-parchment-dark transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+              </svg>
+              {JOURNEY_STEPS[currentStep - 1].title}
+            </button>
+          ) : <div/>}
+          <button onClick={goNext}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-gold text-white hover:bg-gold-light transition-colors">
+            {currentStep < JOURNEY_STEPS.length - 1 ? JOURNEY_STEPS[currentStep + 1].title : 'Complete Journey'}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══ Landing Screen ═══
+  return (
+    <div>
+      {/* Hero */}
+      <div className="text-center mb-10 pt-4">
+        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold to-amber-600 flex items-center justify-center mx-auto mb-5">
+          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6"/>
+          </svg>
+        </div>
+        <h2 className="font-serif text-3xl font-bold text-ink mb-3">The Evidence Journey</h2>
+        <p className="text-ink-light max-w-xl mx-auto mb-6">A guided 30-minute path through the historical case for Jesus as the Messiah. Eight steps, from "Did he exist?" to "Why does it matter?" — with honest evidence, scholarly sources, and counterarguments at every turn.</p>
+        <button onClick={() => { setCurrentStep(0); window.scrollTo(0, 0); }}
+          className="px-6 py-3 rounded-xl text-sm font-medium bg-gold text-white hover:bg-gold-light transition-colors shadow-sm">
+          Begin the Journey →
+        </button>
+      </div>
+
+      {/* Step Map */}
+      <div className="max-w-3xl mx-auto">
+        <h3 className="font-serif font-bold text-ink text-center mb-6">The Path</h3>
+        <div className="space-y-3">
+          {JOURNEY_STEPS.map((s, i) => {
+            const entryCount = s.entryIds.filter(id => DATABASE.entries.find(e => e.id === id)).length;
+            return (
+              <button key={s.id} onClick={() => { setCurrentStep(i); window.scrollTo(0, 0); }}
+                className="w-full text-left flex items-center gap-4 bg-white rounded-xl border border-parchment-darker p-4 hover:border-gold/40 hover:shadow-sm transition-all group">
+                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${s.color} flex items-center justify-center flex-shrink-0`}>
+                  <span className="text-white font-bold text-sm">{i + 1}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-serif font-bold text-ink group-hover:text-gold transition-colors">{s.title}</h4>
+                  <p className="text-xs text-ink-lighter mt-0.5 truncate">{s.narrative.substring(0, 100)}...</p>
+                </div>
+                <span className="text-xs text-ink-lighter bg-parchment-dark rounded-full px-2 py-0.5 flex-shrink-0">{entryCount}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // THE CASE FOR CHRIST VIEW (Phase 8)
 // ═══════════════════════════════════════════════════════════════
 
@@ -2183,9 +2532,10 @@ function CaseForChristView() {
 // ═══════════════════════════════════════════════════════════════
 
 const TABS = [
-  { id: 'explorer', label: 'Evidence Explorer', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
-  { id: 'timeline', label: 'Timeline', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+  { id: 'journey', label: 'Journey', icon: 'M9 5l7 7-7 7' },
+  { id: 'explorer', label: 'Explorer', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
   { id: 'case', label: 'The Case', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
+  { id: 'timeline', label: 'Timeline', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
   { id: 'references', label: 'References', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
   { id: 'editor', label: 'Editor', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' }
 ];
@@ -2195,9 +2545,14 @@ function App() {
 
   // Listen for cross-view navigation events
   useEffect(() => {
-    const handler = (e) => setActiveTab('explorer');
-    window.addEventListener('navigateToEntry', handler);
-    return () => window.removeEventListener('navigateToEntry', handler);
+    const navHandler = (e) => setActiveTab('explorer');
+    const switchHandler = (e) => setActiveTab(e.detail);
+    window.addEventListener('navigateToEntry', navHandler);
+    window.addEventListener('switchTab', switchHandler);
+    return () => {
+      window.removeEventListener('navigateToEntry', navHandler);
+      window.removeEventListener('switchTab', switchHandler);
+    };
   }, []);
 
   // Global keyboard shortcuts
@@ -2205,8 +2560,8 @@ function App() {
     const handler = (e) => {
       // Ignore when typing in inputs
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-      // 1-5 to switch tabs
-      if (e.key >= '1' && e.key <= '5' && !e.ctrlKey && !e.metaKey) {
+      // 1-6 to switch tabs
+      if (e.key >= '1' && e.key <= '6' && !e.ctrlKey && !e.metaKey) {
         const tabIndex = parseInt(e.key) - 1;
         if (TABS[tabIndex]) setActiveTab(TABS[tabIndex].id);
       }
@@ -2246,9 +2601,10 @@ function App() {
 
       {/* Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
+        {activeTab === 'journey' && <JourneyModeView />}
         {activeTab === 'explorer' && <EvidenceExplorerView />}
-        {activeTab === 'timeline' && <TimelineView />}
         {activeTab === 'case' && <CaseForChristView />}
+        {activeTab === 'timeline' && <TimelineView />}
         {activeTab === 'references' && <ReferenceLibraryView />}
         {activeTab === 'editor' && <DataEditorView />}
       </main>
